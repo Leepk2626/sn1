@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级科学：神奇的植物世界</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#bbf7d0 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .font-cartoon {
+            font-family: 'ZCOOL KuaiLe', cursive, sans-serif;
+        }
+        .bouncy-btn {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .bouncy-btn:active {
+            transform: scale(0.92);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px -6px rgba(16, 185, 129, 0.25);
+        }
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+        .pulse-green {
+            animation: pulse-green 1s infinite alternate;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            100% { box-shadow: 0 0 0 14px rgba(34, 197, 94, 0); }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #dcfce7;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4ade80;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between selection:bg-emerald-200">
+
+    <!-- Top Banner & Audio Controls -->
+    <header class="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2 rounded-2xl backdrop-blur-md text-2xl sm:text-3xl">
+                    🌿
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-cartoon tracking-wide text-yellow-200 drop-shadow">一年级科学：植物的世界</h1>
+                    <p class="text-xs sm:text-sm text-emerald-100 hidden sm:block">观察、学习与趣味互动游戏</p>
+                </div>
+            </div>
+
+            <!-- Score & Sound Controls -->
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-700/60 px-3 py-1.5 rounded-full flex items-center space-x-2 border border-emerald-400/40">
+                    <span class="text-yellow-300 text-lg">⭐</span>
+                    <span id="globalScore" class="font-bold text-lg text-white">0</span>
+                    <span class="text-xs text-emerald-200">分</span>
+                </div>
+                <button id="soundToggleBtn" onclick="toggleMute()" class="bg-white/20 hover:bg-white/30 text-white p-2.5 rounded-full transition bouncy-btn" title="声音开关">
+                    <i id="soundIcon" class="fas fa-volume-up text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
+        <!-- Navigation Tabs -->
+        <div class="flex justify-center mb-8">
+            <div class="bg-emerald-100/80 p-1.5 rounded-2xl flex space-x-2 border border-emerald-200 shadow-inner">
+                <button id="tabLearnBtn" onclick="switchTab('learn')" class="px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 flex items-center space-x-2 bg-white text-emerald-700 shadow-sm">
+                    <i class="fas fa-book-open text-emerald-500"></i>
+                    <span>📖 学习天地</span>
+                </button>
+                <button id="tabGameBtn" onclick="switchTab('game')" class="px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 flex items-center space-x-2 text-emerald-800 hover:text-emerald-900">
+                    <i class="fas fa-gamepad text-amber-500"></i>
+                    <span>🎮 闯关游戏</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SECTION 1: LEARN MODE -->
+        <div id="learnSection" class="space-y-8">
+            <!-- Voice assistant tip -->
+            <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <span class="text-3xl">💡</span>
+                    <div>
+                        <h3 class="font-bold text-amber-900 text-sm sm:text-base">学习小提示：</h3>
+                        <p class="text-xs sm:text-sm text-amber-800">点击小喇叭 🔊 可以听到讲解发音哦！点击卡片观察植物的不同特征。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Module Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Card 1: 叶子 -->
+                <div class="bg-white rounded-3xl p-5 border-2 border-emerald-100 shadow-md card-hover relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-green-100 rounded-full blur-lg opacity-70"></div>
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-emerald-500 text-white px-3 py-1 rounded-xl text-xs font-bold">特征 1</span>
+                            <h2 class="text-xl font-bold text-emerald-900 font-cartoon">🍃 叶子 (叶脉)</h2>
+                        </div>
+                        <button onclick="speakText('叶子上的叶脉可分为平行脉和网状脉。例如，茅草是平行脉，木槿是网状脉。')" class="text-emerald-600 hover:text-emerald-800 p-2 rounded-full hover:bg-emerald-50 transition bouncy-btn">
+                            <i class="fas fa-volume-high text-xl"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">植物的叶子上有<b>叶脉</b>，主要分为两种：</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-emerald-50/80 p-3 rounded-2xl border border-emerald-200/60 text-center">
+                            <div class="text-3xl mb-1">🌿</div>
+                            <h3 class="font-bold text-emerald-800 text-sm">平行脉</h3>
+                            <p class="text-xs text-gray-500 mt-1">叶脉平行排列</p>
+                            <span class="inline-block mt-2 bg-emerald-200 text-emerald-800 text-[11px] px-2 py-0.5 rounded-full">例: 茅草、洋葱</span>
+                        </div>
+                        <div class="bg-green-50/80 p-3 rounded-2xl border border-green-200/60 text-center">
+                            <div class="text-3xl mb-1">🍁</div>
+                            <h3 class="font-bold text-green-800 text-sm">网状脉</h3>
+                            <p class="text-xs text-gray-500 mt-1">叶脉像网一样交错</p>
+                            <span class="inline-block mt-2 bg-green-200 text-green-800 text-[11px] px-2 py-0.5 rounded-full">例: 凤仙花、木槿</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: 花 -->
+                <div class="bg-white rounded-3xl p-5 border-2 border-pink-100 shadow-md card-hover relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-pink-500 text-white px-3 py-1 rounded-xl text-xs font-bold">特征 2</span>
+                            <h2 class="text-xl font-bold text-pink-900 font-cartoon">🌸 花 (开花植物)</h2>
+                        </div>
+                        <button onclick="speakText('不是所有的植物都会开花。开花的植物有木槿、羊角豆、九重葛；不会开花的有鸟巢蕨、羊齿植物、苔藓。')" class="text-pink-600 hover:text-pink-800 p-2 rounded-full hover:bg-pink-50 transition bouncy-btn">
+                            <i class="fas fa-volume-high text-xl"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">不是所有的植物都会开花哦：</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-pink-50/80 p-3 rounded-2xl border border-pink-200/60 text-center">
+                            <div class="text-3xl mb-1">🌺</div>
+                            <h3 class="font-bold text-pink-800 text-sm">会开花</h3>
+                            <p class="text-xs text-gray-500 mt-1">会长出美丽的花朵</p>
+                            <span class="inline-block mt-2 bg-pink-200 text-pink-800 text-[11px] px-2 py-0.5 rounded-full">木槿、羊角豆、九重葛</span>
+                        </div>
+                        <div class="bg-rose-50/80 p-3 rounded-2xl border border-rose-200/60 text-center">
+                            <div class="text-3xl mb-1">🪴</div>
+                            <h3 class="font-bold text-rose-800 text-sm">不会开花</h3>
+                            <p class="text-xs text-gray-500 mt-1">没有花朵</p>
+                            <span class="inline-block mt-2 bg-rose-200 text-rose-800 text-[11px] px-2 py-0.5 rounded-full">鸟巢蕨、羊齿植物、苔藓</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: 茎 -->
+                <div class="bg-white rounded-3xl p-5 border-2 border-amber-100 shadow-md card-hover relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-amber-500 text-white px-3 py-1 rounded-xl text-xs font-bold">特征 3</span>
+                            <h2 class="text-xl font-bold text-amber-900 font-cartoon">🪵 茎 (木质茎与草质茎)</h2>
+                        </div>
+                        <button onclick="speakText('植物的茎可分为木质茎和草质茎。木质茎坚硬，例如榴莲树；草质茎柔软，例如向日葵和菜心。')" class="text-amber-600 hover:text-amber-800 p-2 rounded-full hover:bg-amber-50 transition bouncy-btn">
+                            <i class="fas fa-volume-high text-xl"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">植物的茎支撑着身体，主要分为：</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-amber-50/80 p-3 rounded-2xl border border-amber-200/60 text-center">
+                            <div class="text-3xl mb-1">🌳</div>
+                            <h3 class="font-bold text-amber-800 text-sm">木质茎 (坚硬)</h3>
+                            <p class="text-xs text-gray-500 mt-1">树干粗壮坚硬</p>
+                            <span class="inline-block mt-2 bg-amber-200 text-amber-800 text-[11px] px-2 py-0.5 rounded-full">榴莲树、木槿</span>
+                        </div>
+                        <div class="bg-yellow-50/80 p-3 rounded-2xl border border-yellow-200/60 text-center">
+                            <div class="text-3xl mb-1">🌻</div>
+                            <h3 class="font-bold text-amber-800 text-sm">草质茎 (柔软)</h3>
+                            <p class="text-xs text-gray-500 mt-1">绿色且比较柔软</p>
+                            <span class="inline-block mt-2 bg-yellow-200 text-amber-900 text-[11px] px-2 py-0.5 rounded-full">向日葵、菜心</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: 根 -->
+                <div class="bg-white rounded-3xl p-5 border-2 border-orange-100 shadow-md card-hover relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-orange-500 text-white px-3 py-1 rounded-xl text-xs font-bold">特征 4</span>
+                            <h2 class="text-xl font-bold text-orange-900 font-cartoon">🥕 根 (主根与须根)</h2>
+                        </div>
+                        <button onclick="speakText('植物的根分为主根和须根。主根有一条粗大的主根，例如凤仙花和菠菜；须根像一把胡须，例如洋葱和茅草。')" class="text-orange-600 hover:text-orange-800 p-2 rounded-full hover:bg-orange-50 transition bouncy-btn">
+                            <i class="fas fa-volume-high text-xl"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">根长在泥土里，分为两大类：</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-orange-50/80 p-3 rounded-2xl border border-orange-200/60 text-center">
+                            <div class="text-3xl mb-1">🌱</div>
+                            <h3 class="font-bold text-orange-800 text-sm">主根</h3>
+                            <p class="text-xs text-gray-500 mt-1">中间有一条明显粗根</p>
+                            <span class="inline-block mt-2 bg-orange-200 text-orange-900 text-[11px] px-2 py-0.5 rounded-full">凤仙花、菠菜</span>
+                        </div>
+                        <div class="bg-stone-50/80 p-3 rounded-2xl border border-stone-200/60 text-center">
+                            <div class="text-3xl mb-1">🧅</div>
+                            <h3 class="font-bold text-stone-800 text-sm">须根</h3>
+                            <p class="text-xs text-gray-500 mt-1">多条细根像胡须一样</p>
+                            <span class="inline-block mt-2 bg-stone-200 text-stone-800 text-[11px] px-2 py-0.5 rounded-full">洋葱、茅草</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Card 5: 重要性 (Functions) -->
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-6 border-2 border-emerald-200 shadow-md">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-3xl">⭐</span>
+                        <div>
+                            <h2 class="text-2xl font-bold text-emerald-900 font-cartoon">植物各部分的重要性（功能）</h2>
+                            <p class="text-xs sm:text-sm text-emerald-700">每一个器官都有不可替代的作用哦！</p>
+                        </div>
+                    </div>
+                    <button onclick="speakText('叶子制造食物，背面的气孔是呼吸器官。花繁殖后代。茎输送食物、水分和养料。根吸收水分和养料。')" class="bg-emerald-600 text-white px-4 py-2 rounded-2xl shadow hover:bg-emerald-700 transition bouncy-btn flex items-center space-x-2 text-sm">
+                        <i class="fas fa-volume-high"></i>
+                        <span>朗读全部</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-2xl mb-2">🍃</div>
+                        <h3 class="font-bold text-emerald-800">叶子</h3>
+                        <span class="text-xs bg-green-100 text-green-800 font-semibold px-2 py-0.5 rounded-full my-1">制造食物</span>
+                        <p class="text-xs text-gray-500 mt-1">背面有许多气孔，是植物的呼吸器官。</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center text-2xl mb-2">🌸</div>
+                        <h3 class="font-bold text-pink-800">花</h3>
+                        <span class="text-xs bg-pink-100 text-pink-800 font-semibold px-2 py-0.5 rounded-full my-1">繁殖后代</span>
+                        <p class="text-xs text-gray-500 mt-1">能够结出果实和种子，繁殖下一代。</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-2xl mb-2">🪵</div>
+                        <h3 class="font-bold text-amber-800">茎</h3>
+                        <span class="text-xs bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded-full my-1">输送养料</span>
+                        <p class="text-xs text-gray-500 mt-1">支撑植物，并输送水分、食物和养料。</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-2xl mb-2">🥕</div>
+                        <h3 class="font-bold text-orange-800">根</h3>
+                        <span class="text-xs bg-orange-100 text-orange-800 font-semibold px-2 py-0.5 rounded-full my-1">吸收水分</span>
+                        <p class="text-xs text-gray-500 mt-1">把植物固定在泥土里，吸收水分和养料。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: GAME MODE -->
+        <div id="gameSection" class="hidden space-y-6">
+            
+            <!-- Game Level Selector Banner -->
+            <div class="bg-white rounded-3xl p-5 border-2 border-emerald-200 shadow-md flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-emerald-900 font-cartoon">🏆 植物大冒险闯关</h2>
+                    <p class="text-xs sm:text-sm text-gray-600">考验你的时候到了！连续答对即可通关获得勋章！</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="lvl1Btn" onclick="startLevel(1)" class="px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-emerald-500 text-white shadow bouncy-btn">关卡 1: 分类高手</button>
+                    <button id="lvl2Btn" onclick="startLevel(2)" class="px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-gray-100 text-gray-600 hover:bg-emerald-100 bouncy-btn">关卡 2: 连连看</button>
+                    <button id="lvl3Btn" onclick="startLevel(3)" class="px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-gray-100 text-gray-600 hover:bg-emerald-100 bouncy-btn">关卡 3: 知识问答</button>
+                </div>
+            </div>
+
+            <!-- Game Card Frame -->
+            <div id="gameCanvasCard" class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-emerald-200 shadow-lg min-h-[400px] flex flex-col justify-between relative overflow-hidden">
+                <!-- Level Indicator Header -->
+                <div class="flex justify-between items-center pb-4 border-b border-gray-100">
+                    <div class="flex items-center space-x-2">
+                        <span id="levelBadge" class="bg-amber-400 text-amber-950 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                            关卡 1 / 3
+                        </span>
+                        <h3 id="gameTitle" class="text-lg font-bold text-slate-800">植物特征分类</h3>
+                    </div>
+                    <div class="flex items-center space-x-1 text-yellow-400 text-xl" id="starsContainer">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+
+                <!-- Dynamic Game Content Container -->
+                <div id="gameContent" class="py-6 my-auto">
+                    <!-- Dynamic content rendered by JS -->
+                </div>
+
+                <!-- Bottom Progress / Feedback Bar -->
+                <div id="gameFooter" class="pt-4 border-t border-gray-100 flex justify-between items-center text-sm text-gray-500">
+                    <span id="progressText">问题 1 / 4</span>
+                    <button id="nextBtn" onclick="nextQuestion()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2.5 rounded-xl shadow bouncy-btn flex items-center space-x-2">
+                        <span>下一题</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Victory Modal -->
+    <div id="victoryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border-4 border-yellow-300 relative transform transition-all animate-bounce-short">
+            <div class="text-6xl mb-3">🎉</div>
+            <h2 class="text-3xl font-bold font-cartoon text-emerald-800 mb-2">恭喜通关！</h2>
+            <p class="text-gray-600 mb-6 text-sm">你太棒了！成为了真正的<b>“小小植物科学家”</b>！</p>
+            
+            <div class="bg-emerald-50 rounded-2xl p-4 mb-6 border border-emerald-100 flex justify-around">
+                <div>
+                    <span class="text-xs text-gray-500 block">总得分</span>
+                    <span id="finalScore" class="text-2xl font-black text-emerald-600">0</span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 block">获得勋章</span>
+                    <span class="text-2xl">🎖️</span>
+                </div>
+            </div>
+
+            <button onclick="restartGame()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-3.5 rounded-2xl shadow-lg hover:brightness-110 transition bouncy-btn text-base">
+                🔄 再玩一次
+            </button>
+        </div>
+    </div>
+
+    <!-- Canvas for particle confetti -->
+    <canvas id="confettiCanvas" class="pointer-events-none fixed inset-0 z-50"></canvas>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-emerald-100 py-4 mt-8 text-center text-xs text-emerald-700/80">
+        <p>适合一年级小学生 (Primary 1 Science) 🌿 科学教学与互动小游戏</p>
+    </footer>
+
+    <script>
+        /* WEB AUDIO API SOUND SYNTHESIZER (No external audio dependencies) */
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                // Happy chord chime
+                const osc1 = audioCtx.createOscillator();
+                const osc2 = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc1.type = 'sine';
+                osc2.type = 'triangle';
+                osc1.frequency.setValueAtTime(523.25, now); // C5
+                osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.15); // E5
+                osc2.frequency.setValueAtTime(783.99, now + 0.15); // G5
+                osc2.frequency.exponentialRampToValueAtTime(1046.50, now + 0.3); // C6
+
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + 0.4);
+                osc2.stop(now + 0.4);
+            } 
+            else if (type === 'wrong') {
+                // Low buzz sound
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+            else if (type === 'click') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+            else if (type === 'victory') {
+                // Fanfare
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.1);
+                    osc.stop(now + idx * 0.1 + 0.3);
+                });
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('soundIcon');
+            if (isMuted) {
+                icon.className = 'fas fa-volume-xmark text-lg text-red-200';
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            } else {
+                icon.className = 'fas fa-volume-up text-lg';
+                playSound('click');
+            }
+        }
+
+        /* TEXT TO SPEECH (TTS) NARRATION */
+        function speakText(text) {
+            if (isMuted) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop ongoing speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN'; // Chinese Mandarin
+                utterance.rate = 0.9; // Slightly slower for kids
+                utterance.pitch = 1.1; // Friendly tone
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        /* APP STATE MANAGEMENT */
+        let currentTab = 'learn';
+        let currentLevel = 1;
+        let currentQuestionIdx = 0;
+        let score = 0;
+
+        // Game Data Source
+        const levelData = {
+            1: [ // Sorting/Classification
+                {
+                    question: "“茅草”的叶子属于哪一种叶脉？",
+                    emoji: "🌿",
+                    options: [
+                        { text: "平行脉", correct: true, voice: "答对啦！茅草是平行脉。" },
+                        { text: "网状脉", correct: false, voice: "不对哦，茅草的叶脉是平行排列的。" }
+                    ]
+                },
+                {
+                    question: "“榴莲树”的茎属于哪一种茎？",
+                    emoji: "🌳",
+                    options: [
+                        { text: "木质茎 (坚硬)", correct: true, voice: "真棒！榴莲树拥有坚硬的木质茎。" },
+                        { text: "草质茎 (柔软)", correct: false, voice: "不对哦，榴莲树是高大的大树，茎很坚硬。" }
+                    ]
+                },
+                {
+                    question: "“洋葱”的根属于哪一种根？",
+                    emoji: "🧅",
+                    options: [
+                        { text: "须根", correct: true, voice: "太聪明了！洋葱的根像胡须一样，是须根。" },
+                        { text: "主根", correct: false, voice: "再想想看，洋葱没有粗粗的主根哦。" }
+                    ]
+                },
+                {
+                    question: "“鸟巢蕨”会开花吗？",
+                    emoji: "🪴",
+                    options: [
+                        { text: "不会开花", correct: true, voice: "回答正确！鸟巢蕨属于不会开花的植物。" },
+                        { text: "会开花", correct: false, voice: "不对哦，鸟巢蕨是不开花的蕨类植物。" }
+                    ]
+                }
+            ],
+            2: [ // Matching Part functions
+                {
+                    question: "【叶子】的主要重要功能是什么？",
+                    emoji: "🍃",
+                    options: [
+                        { text: "制造食物 (呼吸)", correct: true, voice: "对了！叶子利用阳光制造食物。" },
+                        { text: "吸收水分", correct: false, voice: "吸收水分是根的工作哦！" },
+                        { text: "繁殖后代", correct: false, voice: "繁殖后代主要是花的作用。" }
+                    ]
+                },
+                {
+                    question: "【根】的主要重要功能是什么？",
+                    emoji: "🥕",
+                    options: [
+                        { text: "吸收水分和养料", correct: true, voice: "完全正确！根在泥土里吸收水和养料。" },
+                        { text: "输送食物", correct: false, voice: "输送养料和水分是茎的工作。" },
+                        { text: "吸引昆虫", correct: false, voice: "不对哦！" }
+                    ]
+                },
+                {
+                    question: "【茎】的主要重要功能是什么？",
+                    emoji: "🪵",
+                    options: [
+                        { text: "输送水分、食物和养料", correct: true, voice: "答对啦！茎就像植物的高速公路！" },
+                        { text: "制造食物", correct: false, voice: "制造食物是叶子的功能。" }
+                    ]
+                },
+                {
+                    question: "【花】的主要重要功能是什么？",
+                    emoji: "🌺",
+                    options: [
+                        { text: "繁殖后代", correct: true, voice: "棒极了！花可以结出果实和种子，繁殖后代。" },
+                        { text: "固定植物", correct: false, voice: "固定植物是根的作用。" }
+                    ]
+                }
+            ],
+            3: [ // Science Quiz
+                {
+                    question: "植物叶子背面的“气孔”是用来做什么的？",
+                    emoji: "🌬️",
+                    options: [
+                        { text: "呼吸的器官", correct: true, voice: "正确！气孔是植物呼吸的器官。" },
+                        { text: "吸收阳光", correct: false, voice: "气孔主要是用来呼吸气体exchange的哦。" }
+                    ]
+                },
+                {
+                    question: "菜心和向日葵都属于哪种茎？",
+                    emoji: "🥬",
+                    options: [
+                        { text: "草质茎 (柔软)", correct: true, voice: "非常棒！它们的茎都是柔软的草质茎。" },
+                        { text: "木质茎 (坚硬)", correct: false, voice: "不对哦，它们的茎并不像大树那样坚硬。" }
+                    ]
+                },
+                {
+                    question: "以下哪一种植物会开花？",
+                    emoji: "🌻",
+                    options: [
+                        { text: "木槿 (大红花)", correct: true, voice: "答对啦！木槿会开出美丽的花朵。" },
+                        { text: "苔藓", correct: false, voice: "苔藓是不开花植物。" },
+                        { text: "羊齿植物", correct: false, voice: "羊齿植物也是不开花的哦。" }
+                    ]
+                }
+            ]
+        };
+
+        // Tab switching logic
+        function switchTab(tab) {
+            playSound('click');
+            currentTab = tab;
+            const learnSection = document.getElementById('learnSection');
+            const gameSection = document.getElementById('gameSection');
+            const tabLearnBtn = document.getElementById('tabLearnBtn');
+            const tabGameBtn = document.getElementById('tabGameBtn');
+
+            if (tab === 'learn') {
+                learnSection.classList.remove('hidden');
+                gameSection.classList.add('hidden');
+                tabLearnBtn.className = "px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 flex items-center space-x-2 bg-white text-emerald-700 shadow-sm";
+                tabGameBtn.className = "px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 flex items-center space-x-2 text-emerald-800 hover:text-emerald-900";
+            } else {
+                learnSection.classList.add('hidden');
+                gameSection.classList.remove('hidden');
+                tabGameBtn.className = "px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 flex items-center space-x-2 bg-white text-emerald-700 shadow-sm";
+                tabLearnBtn.className = "px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 flex items-center space-x-2 text-emerald-800 hover:text-emerald-900";
+                startLevel(currentLevel);
+            }
+        }
+
+        // Level controller
+        function startLevel(lvl) {
+            playSound('click');
+            currentLevel = lvl;
+            currentQuestionIdx = 0;
+
+            // Update Level Buttons active state
+            [1, 2, 3].forEach(l => {
+                const btn = document.getElementById(`lvl${l}Btn`);
+                if (l === lvl) {
+                    btn.className = "px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-emerald-500 text-white shadow bouncy-btn";
+                } else {
+                    btn.className = "px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-gray-100 text-gray-600 hover:bg-emerald-100 bouncy-btn";
+                }
+            });
+
+            const titles = {
+                1: "植物特征分类大作战",
+                2: "器官与功能匹配",
+                3: "一年级科学知识大挑战"
+            };
+            document.getElementById('gameTitle').innerText = titles[lvl];
+            document.getElementById('levelBadge').innerText = `关卡 ${lvl} / 3`;
+
+            renderQuestion();
+        }
+
+        // Render current question
+        function renderQuestion() {
+            const questions = levelData[currentLevel];
+            const qData = questions[currentQuestionIdx];
+            const gameContent = document.getElementById('gameContent');
+            const nextBtn = document.getElementById('nextBtn');
+            const progressText = document.getElementById('progressText');
+
+            nextBtn.classList.add('hidden');
+            progressText.innerText = `问题 ${currentQuestionIdx + 1} / ${questions.length}`;
+
+            // Narrate question automatically
+            speakText(qData.question);
+
+            gameContent.innerHTML = `
+                <div class="text-center max-w-lg mx-auto">
+                    <div class="text-6xl mb-4 transform hover:scale-110 transition duration-300 inline-block cursor-pointer" onclick="speakText('${qData.question}')">
+                        ${qData.emoji}
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-6 font-cartoon">
+                        ${qData.question}
+                    </h3>
+
+                    <div class="grid grid-cols-1 gap-3 sm:gap-4 text-left">
+                        ${qData.options.map((opt, idx) => `
+                            <button onclick="checkAnswer(${idx})" class="option-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 text-emerald-950 font-bold p-4 rounded-2xl transition-all duration-200 flex items-center justify-between bouncy-btn group">
+                                <span class="text-base sm:text-lg">${opt.text}</span>
+                                <span class="w-8 h-8 rounded-full bg-white border border-emerald-300 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition">
+                                    ${idx + 1}
+                                </span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkAnswer(selectedIdx) {
+            const questions = levelData[currentLevel];
+            const qData = questions[currentQuestionIdx];
+            const selectedOpt = qData.options[selectedIdx];
+            const optionBtns = document.querySelectorAll('.option-btn');
+
+            // Disable all buttons to prevent double clicking
+            optionBtns.forEach(btn => btn.onclick = null);
+
+            if (selectedOpt.correct) {
+                // Correct answer
+                playSound('correct');
+                speakText(selectedOpt.voice);
+                optionBtns[selectedIdx].classList.remove('bg-emerald-50', 'border-emerald-200');
+                optionBtns[selectedIdx].classList.add('bg-green-500', 'text-white', 'border-green-600', 'pulse-green');
+                
+                score += 10;
+                document.getElementById('globalScore').innerText = score;
+
+            } else {
+                // Incorrect answer
+                playSound('wrong');
+                speakText(selectedOpt.voice);
+                optionBtns[selectedIdx].classList.remove('bg-emerald-50', 'border-emerald-200');
+                optionBtns[selectedIdx].classList.add('bg-red-400', 'text-white', 'border-red-500', 'shake');
+
+                // Highlight correct one
+                qData.options.forEach((opt, idx) => {
+                    if (opt.correct) {
+                        optionBtns[idx].classList.add('bg-green-100', 'border-green-400', 'text-green-900');
+                    }
+                });
+            }
+
+            // Show next button
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            const questions = levelData[currentLevel];
+            currentQuestionIdx++;
+
+            if (currentQuestionIdx < questions.length) {
+                renderQuestion();
+            } else {
+                // Level finished
+                if (currentLevel < 3) {
+                    startLevel(currentLevel + 1);
+                } else {
+                    // Game Complete Celebration
+                    showVictoryModal();
+                }
+            }
+        }
+
+        function showVictoryModal() {
+            playSound('victory');
+            speakText("恭喜你！通关成功！你太棒啦！");
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('victoryModal').classList.remove('hidden');
+            triggerConfetti();
+        }
+
+        function restartGame() {
+            playSound('click');
+            document.getElementById('victoryModal').classList.add('hidden');
+            score = 0;
+            document.getElementById('globalScore').innerText = score;
+            startLevel(1);
+        }
+
+        // Simple Canvas Confetti FX
+        function triggerConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#22c55e', '#eab308', '#ec4899', '#3b82f6', '#a855f7'];
+
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vy: Math.random() * 3 + 2,
+                    vx: Math.random() * 2 - 1
+                });
+            }
+
+            let animationFrame;
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                if (particles.some(p => p.y < canvas.height)) {
+                    animationFrame = requestAnimationFrame(render);
+                } else {
+                    cancelAnimationFrame(animationFrame);
+                }
+            }
+            render();
+        }
+
+        // Initialize audio context on first click anywhere
+        window.addEventListener('click', () => {
+            initAudio();
+        }, { once: true });
+    </script>
+</body>
+</html>
